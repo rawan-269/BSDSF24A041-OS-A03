@@ -12,6 +12,7 @@ Prompt: `FCIT>`
 | v2 | Built-in commands: exit, cd, help, jobs |
 | v3 | Command history: history command and !n re-execution (last 20 commands) |
 | v4 | GNU Readline: line editing, Up/Down arrow history, Tab completion |
+| v5 | I/O redirection (input and output) and pipes, including multi-stage pipelines |
 
 ## Requirements
 
@@ -45,6 +46,14 @@ Install on Ubuntu:
 | jobs | Placeholder for job control (not yet implemented) |
 | history | Show the last 20 commands with numbers |
 | !n | Re-run the n-th command from history |
+
+## Operators
+
+| Syntax | Description |
+|--------|-------------|
+| `cmd > file` | Redirect output of cmd to file (file is created or truncated) |
+| `cmd < file` | Take input of cmd from file |
+| `cmd1 \| cmd2` | Pipe output of cmd1 into cmd2 (multi-stage pipelines work) |
 
 ## Project structure
 
