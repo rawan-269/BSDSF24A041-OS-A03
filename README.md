@@ -39,7 +39,7 @@ Install on Ubuntu:
 
 | Command | Description |
 |---------|-------------|
-| cd <dir> | Change the current directory |
+| `cd <dir>` | Change the current directory |
 | exit | Exit the shell |
 | help | Show the list of built-in commands |
 | jobs | Placeholder for job control (not yet implemented) |
@@ -64,5 +64,5 @@ Each feature is tagged and published as a GitHub release (v1.0-base, v2, v3, v4,
 
 ## Author
 
-Roll No: BSDSF24A041
-GitHub: rawan-269
+- Roll No: BSDSF24A041
+- GitHub: rawan-269
