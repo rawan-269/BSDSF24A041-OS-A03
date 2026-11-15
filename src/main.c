@@ -1,10 +1,17 @@
 #include "shell.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 int main() {
     char* cmdline;
     char** arglist;
 
-    while ((cmdline = read_cmd(PROMPT, stdin)) != NULL) {
+    while ((cmdline = readline(PROMPT)) != NULL) {
+        if (cmdline[0] == '\0') {
+            free(cmdline);
+            continue;
+        }
+
         if (cmdline[0] == '!') {
             int n = atoi(cmdline + 1);
             char* h = hist_get(n);
@@ -19,6 +26,7 @@ int main() {
         }
 
         if ((arglist = tokenize(cmdline)) != NULL) {
+            add_history(cmdline);
             hist_add(cmdline);
 
             if (!handle_builtin(arglist)) {
