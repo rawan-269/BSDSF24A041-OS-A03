@@ -29,8 +29,14 @@ int main() {
             add_history(cmdline);
             hist_add(cmdline);
 
-            if (!handle_builtin(arglist)) {
-                execute(arglist);
+            Command cmds[MAXCMDS];
+            int n = parse_commands(arglist, cmds);
+
+            if (n > 0) {
+                int simple = (n == 1 && cmds[0].infile == NULL && cmds[0].outfile == NULL);
+                if (!(simple && handle_builtin(cmds[0].argv))) {
+                    execute_pipeline(cmds, n);
+                }
             }
 
             for (int i = 0; arglist[i] != NULL; i++) {
