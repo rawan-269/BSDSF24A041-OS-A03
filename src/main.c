@@ -2,11 +2,35 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+static void run_segment(char** seg, int background) {
+    char* label = join_tokens(seg);
+    Command cmds[MAXCMDS];
+    int n = parse_commands(seg, cmds);
+
+    if (n > 0) {
+        int simple = (n == 1 && cmds[0].infile == NULL && cmds[0].outfile == NULL);
+        if (!(simple && handle_builtin(cmds[0].argv))) {
+            pid_t pid = execute_pipeline(cmds, n, background);
+            if (background && pid > 0) {
+                job_add(pid, label);
+                label = NULL;
+            }
+        }
+    }
+
+    free(label);
+}
+
 int main() {
     char* cmdline;
     char** arglist;
 
-    while ((cmdline = readline(PROMPT)) != NULL) {
+    while (1) {
+        reap_jobs();
+
+        cmdline = readline(PROMPT);
+        if (cmdline == NULL) break;
+
         if (cmdline[0] == '\0') {
             free(cmdline);
             continue;
@@ -29,18 +53,34 @@ int main() {
             add_history(cmdline);
             hist_add(cmdline);
 
-            Command cmds[MAXCMDS];
-            int n = parse_commands(arglist, cmds);
+            int i = 0;
+            while (arglist[i] != NULL) {
+                char* seg[MAXARGS + 1];
+                int k = 0;
 
-            if (n > 0) {
-                int simple = (n == 1 && cmds[0].infile == NULL && cmds[0].outfile == NULL);
-                if (!(simple && handle_builtin(cmds[0].argv))) {
-                    execute_pipeline(cmds, n);
+                while (arglist[i] != NULL &&
+                       strcmp(arglist[i], ";") != 0 &&
+                       strcmp(arglist[i], "&") != 0) {
+                    seg[k++] = arglist[i++];
                 }
+                seg[k] = NULL;
+
+                int background = 0;
+                if (arglist[i] != NULL) {
+                    background = (strcmp(arglist[i], "&") == 0);
+                    i++;
+                }
+
+                if (k == 0) {
+                    fprintf(stderr, "syntax error near '%s'\n", background ? "&" : ";");
+                    break;
+                }
+
+                run_segment(seg, background);
             }
 
-            for (int i = 0; arglist[i] != NULL; i++) {
-                free(arglist[i]);
+            for (int j = 0; arglist[j] != NULL; j++) {
+                free(arglist[j]);
             }
             free(arglist);
         }

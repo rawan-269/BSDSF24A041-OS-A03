@@ -1,6 +1,6 @@
 #include "shell.h"
 
-int execute_pipeline(Command* cmds, int n) {
+pid_t execute_pipeline(Command* cmds, int n, int background) {
     int prev_read = -1;
     int fd[2];
     pid_t pids[MAXCMDS];
@@ -32,6 +32,13 @@ int execute_pipeline(Command* cmds, int n) {
                 close(fd[0]);
                 dup2(fd[1], STDOUT_FILENO);
                 close(fd[1]);
+            }
+            if (background && i == 0 && cmds[i].infile == NULL) {
+                int f = open("/dev/null", O_RDONLY);
+                if (f >= 0) {
+                    dup2(f, STDIN_FILENO);
+                    close(f);
+                }
             }
             if (cmds[i].infile != NULL) {
                 int f = open(cmds[i].infile, O_RDONLY);
@@ -70,6 +77,11 @@ int execute_pipeline(Command* cmds, int n) {
 
     if (prev_read != -1) {
         close(prev_read);
+    }
+
+    if (background) {
+        if (started == n) return pids[started - 1];
+        return 0;
     }
 
     for (int i = 0; i < started; i++) {
