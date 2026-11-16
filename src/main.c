@@ -8,6 +8,21 @@ static int run_segment(char** seg, int background) {
 
     char* label = join_tokens(seg);
 
+    /* Handle variable assignment as a built-in */
+    if (seg[0] != NULL && seg[1] == NULL &&
+        is_assignment(seg[0])) {
+
+        char* equal = strchr(seg[0], '=');
+        *equal = '\0';
+
+        set_variable(seg[0], equal + 1);
+
+        *equal = '=';
+
+        free(label);
+        return 0;
+    }
+
     Command cmds[MAXCMDS];
 
     int n = parse_commands(seg, cmds);
@@ -66,6 +81,8 @@ static int process_line(char* line) {
 
     while (arglist[i] != NULL) {
 
+        int start_index = i;
+
         char* seg[MAXARGS + 1];
         int k = 0;
 
@@ -77,6 +94,14 @@ static int process_line(char* line) {
         }
 
         seg[k] = NULL;
+
+        /* Expand variables for this segment */
+        expand_variables(seg);
+
+        /* Update original pointers to avoid double-free */
+        for (int j = 0; j < k; j++) {
+            arglist[start_index + j] = seg[j];
+        }
 
         int background = 0;
 

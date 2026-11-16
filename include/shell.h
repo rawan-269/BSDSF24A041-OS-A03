@@ -23,6 +23,13 @@ typedef struct {
     char* outfile;
 } Command;
 
+/* Shell variables linked list */
+typedef struct ShellVar {
+    char* name;
+    char* value;
+    struct ShellVar* next;
+} ShellVar;
+
 char** tokenize(char* cmdline);
 int parse_commands(char** arglist, Command* cmds);
 
@@ -30,6 +37,12 @@ pid_t execute_pipeline(Command* cmds, int n, int background,
                        int* exit_status);
 
 int handle_builtin(char** arglist);
+
+void set_variable(const char* name, const char* value);
+const char* get_variable(const char* name);
+void print_variables(void);
+int is_assignment(const char* token);
+void expand_variables(char** arglist);
 
 void hist_add(const char* cmd);
 char* hist_get(int n);
