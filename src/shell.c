@@ -1,3 +1,4 @@
+
 #include "shell.h"
 
 typedef struct {
@@ -338,12 +339,18 @@ int handle_builtin(char** arglist) {
     else if (strcmp(arglist[0], "help") == 0) {
         printf("Built-in commands:\n");
         printf("  cd <dir>  - change directory\n");
-        printf("  set       - display shell variables\n");
+        printf("  set       - display all shell variables\n");
         printf("  exit      - exit the shell\n");
         printf("  help      - show this help\n");
         printf("  jobs      - list running background jobs\n");
         printf("  history   - show command history\n");
         printf("  !n        - re-run the n-th command from history\n");
+
+        printf("Shell variables:\n");
+        printf("  NAME=value - assign or update a variable\n");
+        printf("  $NAME      - expand a variable in a command\n");
+        printf("  echo $NAME - display a variable's value\n");
+
         printf("Operators:\n");
         printf("  cmd > file   - redirect output to file\n");
         printf("  cmd < file   - take input from file\n");
