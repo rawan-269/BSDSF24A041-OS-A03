@@ -3,7 +3,50 @@
 #include <readline/history.h>
 
 /* Execute one command segment */
+/* Feature 4: Command completion */
+static char *command_generator(const char *text, int state) {
+    static const char *commands[] = {
+        "cd", "exit", "help", "jobs", "history", "set",
+        "echo", "pwd", "ls", "cat", "grep", "mkdir",
+        "rmdir", "rm", "touch", "cp", "mv", "clear",
+        "date", "whoami", "uname", "head", "tail",
+        "wc", "sort", "sleep", "true", "false",
+        NULL
+    };
 
+    static int index;
+    static size_t length;
+
+    if (state == 0) {
+        index = 0;
+        length = strlen(text);
+    }
+
+    while (commands[index] != NULL) {
+        const char *name = commands[index++];
+
+        if (strncmp(name, text, length) == 0) {
+            return strdup(name);
+        }
+    }
+
+    return NULL;
+}
+
+static char **shell_completion(
+    const char *text, int start, int end
+) {
+    (void)end;
+
+    /* Complete command names only at the beginning */
+    if (start != 0) {
+        return NULL;
+    }
+
+    rl_attempted_completion_over = 0;
+
+    return rl_completion_matches(text, command_generator);
+}
 static int run_segment(char** seg, int background) {
 
     char* label = join_tokens(seg);
@@ -274,7 +317,7 @@ cleanup:
 /* Main function */
 
 int main() {
-
+        rl_attempted_completion_function = shell_completion;
     char* cmdline;
 
     while (1) {
